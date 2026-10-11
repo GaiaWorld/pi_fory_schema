@@ -1,0 +1,11 @@
+[package]
+name = "pi_fory_schema"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+publish = false
+
+[dependencies]
+fory = "=1.7.3"
+bytes = "=1.12.1"
+pi_fory_schema_derive = { path = "../pi_fory_schema_derive" }
