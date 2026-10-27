@@ -1,5 +1,11 @@
 //! Schema limits are configurable; defaults are policy, not proven safety bounds.
 //! Both configurations are publicly constructible; limit enforcement remains unimplemented.
+#[path = "limits_inner.rs"]
+mod limits_inner;
+
+struct SchemaLimitsInner;
+struct ParseLimitsInner;
+
 /// Per-call schema and import limits; checks are not implemented.
 /// Bounds are inclusive; checked-counter overflow is a resource-limit failure.
 /// Import checks incrementally, then compilation rechecks without double charging.
@@ -24,14 +30,7 @@ pub struct SchemaLimits {
 }
 impl Default for SchemaLimits {
     fn default() -> Self {
-        Self {
-            max_document_bytes: 1024 * 1024,
-            max_json_depth: 16,
-            max_definitions: 512,
-            max_type_nodes: 8192,
-            max_members: 8192,
-            max_metadata_bytes: 512 * 1024,
-        }
+        SchemaLimitsInner::default()
     }
 }
 
@@ -50,8 +49,6 @@ pub struct ParseLimits {
 
 impl Default for ParseLimits {
     fn default() -> Self {
-        Self {
-            max_input_bytes: 1024 * 1024,
-        }
+        ParseLimitsInner::default()
     }
 }

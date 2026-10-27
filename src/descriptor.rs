@@ -38,7 +38,17 @@ pub enum UserIdentity {
 pub struct TypeDescriptor {
     pub nullable: bool,
     pub track_ref: bool,
+    /// Required for I32/U32/I64/U64; None for every other node kind.
+    pub integer_encoding: Option<IntegerEncoding>,
     pub kind: TypeKind,
+}
+
+/// Explicit integer wire encoding; no default is inferred.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum IntegerEncoding {
+    Fixed,
+    Varint,
+    Tagged,
 }
 
 /// Logical scalar kinds; integer wire encodings still need adapter verification.
@@ -91,9 +101,18 @@ pub struct UserDefinition {
 /// Vector order is logical order. Skipped fields and runtime Unknown are omitted.
 #[derive(Clone, Debug)]
 pub enum UserDefinitionKind {
-    Struct { fields: Vec<FieldDescriptor> },
-    Enum { variants: Vec<VariantDescriptor> },
-    Union { variants: Vec<VariantDescriptor> },
+    Struct {
+        fields: Vec<FieldDescriptor>,
+        /// Complete permutation of logical field positions in wire order.
+        /// Supplied by the description producer, never inferred by compilation.
+        physical_field_order: Vec<usize>,
+    },
+    Enum {
+        variants: Vec<VariantDescriptor>,
+    },
+    Union {
+        variants: Vec<VariantDescriptor>,
+    },
 }
 
 /// ID ranges, uniqueness, and name constraints await validation rules.

@@ -14,8 +14,8 @@ pub mod schema;
 pub mod value;
 
 pub use descriptor::{
-    FieldDescriptor, ScalarKind, SchemaDescriptor, TypeDescriptor, TypeKind, UserDefinition,
-    UserDefinitionKind, UserIdentity, VariantDescriptor,
+    FieldDescriptor, IntegerEncoding, ScalarKind, SchemaDescriptor, TypeDescriptor, TypeKind,
+    UserDefinition, UserDefinitionKind, UserIdentity, VariantDescriptor,
 };
 pub use document::{
     KEY_SEMANTICS_VERSION, SCHEMA_DOCUMENT_FORMAT, SCHEMA_DOCUMENT_VERSION, export_json,

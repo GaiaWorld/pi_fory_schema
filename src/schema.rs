@@ -14,42 +14,47 @@ use std::{collections::HashMap, sync::Arc};
 #[derive(Clone)]
 pub struct Schema {
     /// Clones share compiled data without rebuilding descriptions or indexes.
-    _data: Arc<SchemaData>,
+    pub(crate) _data: Arc<SchemaData>,
 }
 
 /// Immutable compiled contract only; no input, parsing state, or graph identity.
-struct SchemaData {
+pub(crate) struct SchemaData {
     /// Complete immutable contract, including root encoding and semantics.
-    _descriptor: SchemaDescriptor,
+    pub(crate) _descriptor: SchemaDescriptor,
     /// Private lookup data derived from the immutable descriptor.
-    _type_access: TypeAccess,
+    pub(crate) _type_access: TypeAccess,
 }
 
 /// Identity lookup only; values index SchemaDescriptor::definitions directly.
 /// Map hashing and iteration order never define stable hashes or equivalence.
-struct TypeAccess {
-    _definition_by_identity: HashMap<UserIdentity, usize>,
+pub(crate) struct TypeAccess {
+    pub(crate) _definition_by_identity: HashMap<UserIdentity, usize>,
     /// Keys index definitions; entries exist only for struct definitions.
-    _struct_access: HashMap<usize, StructAccess>,
+    pub(crate) _struct_access: HashMap<usize, StructAccess>,
     /// Keys index definitions; entries exist only for enum or union definitions.
-    _variant_access: HashMap<usize, VariantAccess>,
+    pub(crate) _variant_access: HashMap<usize, VariantAccess>,
 }
 
 /// All positions index the descriptor's logical field sequence.
 /// Input-specific offsets and remote metadata remain outside this structure.
-struct StructAccess {
+pub(crate) struct StructAccess {
     /// Logical field positions in physical encoding order.
-    _physical_field_order: Vec<usize>,
+    pub(crate) _physical_field_order: Vec<usize>,
     /// Only explicitly declared IDs have entries.
-    _field_by_id: HashMap<u32, usize>,
-    _field_by_name: HashMap<String, usize>,
+    pub(crate) _field_by_id: HashMap<u32, usize>,
+    pub(crate) _field_by_name: HashMap<String, usize>,
 }
 
 /// Protocol case IDs map to logical variant positions, never numeric ordering.
 /// Names and payload descriptions remain in the original descriptor.
-struct VariantAccess {
-    _variant_by_id: HashMap<u32, usize>,
+pub(crate) struct VariantAccess {
+    pub(crate) _variant_by_id: HashMap<u32, usize>,
 }
+
+#[path = "schema_inner.rs"]
+mod schema_inner;
+
+struct SchemaInner;
 
 impl Schema {
     /// Compiles and validates the descriptor within the supplied schema budget.
@@ -57,11 +62,11 @@ impl Schema {
         _descriptor: SchemaDescriptor,
         _limits: &SchemaLimits,
     ) -> Result<Self, SchemaError> {
-        Err(SchemaError::NotImplemented("Schema::compile"))
+        SchemaInner::compile(_descriptor, _limits)
     }
     /// Checks schema key capabilities without parsing data or consuming a parse budget.
     pub fn check_key_support(&self, _requirement: KeyRequirement) -> Result<(), SchemaError> {
-        Err(SchemaError::NotImplemented("Schema::check_key_support"))
+        SchemaInner::check_key_support(self, _requirement)
     }
     /// Opens a borrowed, not-yet-validated root with a context-owned parse budget.
     pub fn view<'a>(
@@ -70,7 +75,7 @@ impl Schema {
         _format: InputFormat,
         _limits: &ParseLimits,
     ) -> Result<ValueView<'a>, DataError> {
-        Err(DataError::NotImplemented("Schema::view"))
+        SchemaInner::view(self, _input, _format, _limits)
     }
     /// Opens and fully validates one borrowed root within the supplied budget.
     pub fn validate<'a>(
@@ -79,7 +84,7 @@ impl Schema {
         _format: InputFormat,
         _limits: &ParseLimits,
     ) -> Result<ValidatedValue<'a>, DataError> {
-        Err(DataError::NotImplemented("Schema::validate"))
+        SchemaInner::validate(self, _input, _format, _limits)
     }
     /// Retains the schema and stable input lease in an unvalidated root context.
     pub fn view_owned(
@@ -88,7 +93,7 @@ impl Schema {
         _format: InputFormat,
         _limits: &ParseLimits,
     ) -> Result<OwnedValueView, DataError> {
-        Err(DataError::NotImplemented("Schema::view_owned"))
+        SchemaInner::view_owned(self, _input, _format, _limits)
     }
     /// Retains the schema and input lease and validates within the supplied budget.
     pub fn validate_owned(
@@ -97,7 +102,7 @@ impl Schema {
         _format: InputFormat,
         _limits: &ParseLimits,
     ) -> Result<OwnedValidatedValue, DataError> {
-        Err(DataError::NotImplemented("Schema::validate_owned"))
+        SchemaInner::validate_owned(self, _input, _format, _limits)
     }
     /// Convenience alias for the unified owned Bytes entry point.
     pub fn view_bytes(
@@ -106,7 +111,7 @@ impl Schema {
         _format: InputFormat,
         _limits: &ParseLimits,
     ) -> Result<OwnedValueView, DataError> {
-        self.view_owned(_input, _format, _limits)
+        SchemaInner::view_bytes(self, _input, _format, _limits)
     }
     /// Convenience alias for the unified validated owned Bytes entry point.
     pub fn validate_bytes(
@@ -115,6 +120,6 @@ impl Schema {
         _format: InputFormat,
         _limits: &ParseLimits,
     ) -> Result<OwnedValidatedValue, DataError> {
-        self.validate_owned(_input, _format, _limits)
+        SchemaInner::validate_bytes(self, _input, _format, _limits)
     }
 }

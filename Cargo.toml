@@ -8,4 +8,5 @@ publish = false
 [dependencies]
 fory = "=1.7.3"
 bytes = "=1.12.1"
+rapidhash = { version = "=4.1.0", default-features = false, features = ["std"] }
 pi_fory_schema_derive = { path = "../pi_fory_schema_derive" }

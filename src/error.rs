@@ -1,6 +1,13 @@
 //! Classified errors with structural locations only; never embed raw KV data.
 use std::{error::Error, fmt};
 
+#[path = "error_inner.rs"]
+mod error_inner;
+
+struct SchemaErrorInner;
+struct DataErrorInner;
+struct KeyErrorInner;
+
 /// Structural steps from the root. Names come from schema metadata, not values.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PathSegment {
@@ -67,15 +74,12 @@ pub enum SchemaError {
 
 impl fmt::Display for SchemaError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{self:?}")
+        SchemaErrorInner::fmt(self, f)
     }
 }
 impl Error for SchemaError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match self {
-            Self::ForyRegistration { source, .. } => Some(source),
-            _ => None,
-        }
+        SchemaErrorInner::source(self)
     }
 }
 
@@ -96,7 +100,7 @@ pub enum DataError {
 
 impl fmt::Display for DataError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{self:?}")
+        DataErrorInner::fmt(self, f)
     }
 }
 impl Error for DataError {}
@@ -120,7 +124,7 @@ pub enum KeyError {
 
 impl fmt::Display for KeyError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{self:?}")
+        KeyErrorInner::fmt(self, f)
     }
 }
 impl Error for KeyError {}
